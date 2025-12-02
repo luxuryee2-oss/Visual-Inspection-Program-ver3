@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <title>제품 외관검사</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-root">
+      <header class="app-header">
+        <div class="app-title-group">
+          <h1 class="app-title">제품 외관검사</h1>
+          <p class="app-subtitle">스마트폰 전용 검사 기록 웹앱</p>
+        </div>
+        <div class="app-meta">
+          <span id="today-date" class="meta-pill"></span>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <!-- 제품 정보 카드 -->
+        <section class="card">
+          <h2 class="card-title">제품 / 검사 정보</h2>
+
+          <div class="field-group">
+            <label for="datamatrix" class="field-label">데이터메트릭스 값</label>
+            <div class="field-inline">
+              <input
+                id="datamatrix"
+                type="text"
+                class="input"
+                placeholder="스캔값 또는 수동 입력"
+                autocomplete="off"
+              />
+              <button id="btn-scan" type="button" class="btn btn-ghost">
+                스캔
+              </button>
+            </div>
+            <p class="field-hint">
+              실제 스캐너 연동 전까지는 값 수동 입력 또는 스캐너에서 복사 붙여넣기로
+              사용하세요.
+            </p>
+          </div>
+
+          <div class="field-group">
+            <label for="product-name" class="field-label">제품명</label>
+            <input
+              id="product-name"
+              type="text"
+              class="input"
+              placeholder="데이터메트릭스에서 자동 입력 또는 직접 입력"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="inspector" class="field-label">검사자</label>
+            <input
+              id="inspector"
+              type="text"
+              class="input"
+              placeholder="검사자 이름"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="note" class="field-label">비고</label>
+            <textarea
+              id="note"
+              class="textarea"
+              rows="3"
+              placeholder="특이사항, 불량 내용 등을 입력하세요."
+            ></textarea>
+          </div>
+        </section>
+
+        <!-- 이미지 업로드 카드들 -->
+        <section class="card">
+          <h2 class="card-title">제품 이미지</h2>
+          <p class="card-description">
+            각 방향별로 촬영 또는 갤러리에서 선택하여 이미지를 첨부하세요.
+          </p>
+
+          <div class="image-row">
+            <div class="image-card">
+              <div class="image-card-header">
+                <span class="image-label">정면</span>
+              </div>
+              <div class="image-preview-wrapper">
+                <img
+                  id="preview-front"
+                  class="image-preview"
+                  alt="정면 미리보기"
+                />
+                <span class="image-placeholder">이미지 없음</span>
+              </div>
+              <div class="image-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  data-target="front-camera"
+                >
+                  촬영
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-target="front-gallery"
+                >
+                  갤러리
+                </button>
+              </div>
+              <input
+                id="file-front-camera"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="file-hidden"
+              />
+              <input
+                id="file-front-gallery"
+                type="file"
+                accept="image/*"
+                class="file-hidden"
+              />
+            </div>
+
+            <div class="image-card">
+              <div class="image-card-header">
+                <span class="image-label">후면</span>
+              </div>
+              <div class="image-preview-wrapper">
+                <img
+                  id="preview-back"
+                  class="image-preview"
+                  alt="후면 미리보기"
+                />
+                <span class="image-placeholder">이미지 없음</span>
+              </div>
+              <div class="image-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  data-target="back-camera"
+                >
+                  촬영
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-target="back-gallery"
+                >
+                  갤러리
+                </button>
+              </div>
+              <input
+                id="file-back-camera"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="file-hidden"
+              />
+              <input
+                id="file-back-gallery"
+                type="file"
+                accept="image/*"
+                class="file-hidden"
+              />
+            </div>
+
+            <div class="image-card">
+              <div class="image-card-header">
+                <span class="image-label">측면</span>
+              </div>
+              <div class="image-preview-wrapper">
+                <img
+                  id="preview-side"
+                  class="image-preview"
+                  alt="측면 미리보기"
+                />
+                <span class="image-placeholder">이미지 없음</span>
+              </div>
+              <div class="image-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  data-target="side-camera"
+                >
+                  촬영
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-target="side-gallery"
+                >
+                  갤러리
+                </button>
+              </div>
+              <input
+                id="file-side-camera"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="file-hidden"
+              />
+              <input
+                id="file-side-gallery"
+                type="file"
+                accept="image/*"
+                class="file-hidden"
+              />
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <button id="btn-save" type="button" class="btn btn-accent btn-save">
+          저장
+        </button>
+      </footer>
+
+      <div id="toast-container"></div>
+      <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">저장 중...</p>
+      </div>
+    </div>
+
+    <!-- 앱 스크립트 -->
+    <script src="script.js"></script>
+  </body>
+  </html>
+
+
