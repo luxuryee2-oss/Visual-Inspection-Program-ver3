@@ -197,10 +197,19 @@ function startScanning() {
         // 스캔 성공
         stopScanning();
         elDatamatrix.value = decodedText;
-        if (!elProductName.value) {
-          elProductName.value = decodedText;
+        
+        // 데이터메트릭스에서 제품명 추출
+        const extractedName = extractProductNameFromDatamatrix(decodedText);
+        if (extractedName) {
+          elProductName.value = extractedName;
+          showToast('데이터메트릭스를 스캔하고 제품명을 추출했습니다.', 'success');
+        } else {
+          // 추출 실패 시 원본 값 사용
+          if (!elProductName.value) {
+            elProductName.value = decodedText;
+          }
+          showToast('데이터메트릭스를 스캔했습니다.', 'success');
         }
-        showToast('데이터메트릭스를 스캔했습니다.', 'success');
       },
       (errorMessage) => {
         // 스캔 중 에러 (무시 - 계속 스캔)
@@ -231,16 +240,79 @@ function stopScanning() {
 }
 
 // ============================
+// 데이터메트릭스에서 제품명 추출
+// ============================
+
+/**
+ * 데이터메트릭스 값에서 제품명을 추출합니다.
+ * 규칙:
+ * - P 필드: P 다음부터 10글자
+ * - E 필드: E 다음부터 2글자
+ * - C 필드: C 제외한 나머지에서 끝에서 10~8번째 (3글자)
+ * - 최종: P값 + E값 + C값
+ */
+function extractProductNameFromDatamatrix(datamatrixValue) {
+  if (!datamatrixValue || typeof datamatrixValue !== 'string') {
+    return '';
+  }
+
+  let pValue = '';
+  let eValue = '';
+  let cValue = '';
+
+  // 정규식으로 P, E, C 필드 직접 찾기 (더 안정적)
+  // P 필드: P로 시작하는 필드에서 P 다음 10글자 (대소문자, 숫자 포함)
+  const pMatch = datamatrixValue.match(/P([A-Za-z0-9]{10,})/);
+  if (pMatch && pMatch[1]) {
+    pValue = pMatch[1].substring(0, 10); // 최대 10글자
+  }
+
+  // E 필드: E로 시작하는 필드에서 E 다음 2글자 (대소문자, 숫자 포함)
+  const eMatch = datamatrixValue.match(/E([A-Za-z0-9]{2,})/);
+  if (eMatch && eMatch[1]) {
+    eValue = eMatch[1].substring(0, 2); // 최대 2글자
+  }
+
+  // C 필드: C로 시작하고 바로 숫자가 오는 필드 (C 필드는 보통 숫자로 시작)
+  // 실제 예시: C020100007000000A2 → 020100007000000A2 → 끝에서 11,10,9번째 → 007
+  // C 필드는 숫자와 영문이 섞여 있을 수 있음
+  // P 필드 안의 'CU810' 같은 것과 구분하기 위해 C 다음에 숫자가 오는 패턴 사용
+  const cMatch = datamatrixValue.match(/C([0-9][A-Za-z0-9]*)/);
+  if (cMatch && cMatch[1]) {
+    const cContent = cMatch[1]; // C 제외한 내용
+    if (cContent.length >= 11) {
+      // 끝에서 11번째부터 3글자 (인덱스: length-11 ~ length-9)
+      const startIdx = cContent.length - 11;
+      const endIdx = cContent.length - 8;
+      cValue = cContent.substring(startIdx, endIdx);
+    }
+  }
+
+  // 3개 값을 합쳐서 반환
+  return pValue + eValue + cValue;
+}
+
+// ============================
 // 입력값 처리 및 검증
 // ============================
 
 function bindDatamatrixBehavior() {
   if (!elDatamatrix || !elProductName) return;
 
-  // 데이터메트릭스 입력 후 포커스 아웃 시 제품명 자동 채움 (비어 있을 때만)
+  // 데이터메트릭스 입력 후 포커스 아웃 시 제품명 자동 채움
   elDatamatrix.addEventListener('blur', () => {
-    if (!elProductName.value && elDatamatrix.value) {
-      elProductName.value = elDatamatrix.value;
+    if (elDatamatrix.value) {
+      // 데이터메트릭스에서 제품명 추출 시도
+      const extractedName = extractProductNameFromDatamatrix(elDatamatrix.value);
+      if (extractedName) {
+        // 추출 성공 시 제품명에 설정 (기존 값이 없거나 덮어쓰기 원할 때)
+        if (!elProductName.value) {
+          elProductName.value = extractedName;
+        }
+      } else if (!elProductName.value) {
+        // 추출 실패 시 원본 값 사용 (제품명이 비어 있을 때만)
+        elProductName.value = elDatamatrix.value;
+      }
     }
   });
 
