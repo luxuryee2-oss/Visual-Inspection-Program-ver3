@@ -41,8 +41,7 @@
               </button>
             </div>
             <p class="field-hint">
-              실제 스캐너 연동 전까지는 값 수동 입력 또는 스캐너에서 복사 붙여넣기로
-              사용하세요.
+              스캔 버튼을 눌러 카메라로 데이터메트릭스를 읽거나, 수동으로 입력하세요.
             </p>
           </div>
 
@@ -232,6 +231,20 @@
       </div>
     </div>
 
+    <!-- 카메라 스캔 모달 -->
+    <div id="scan-modal" class="scan-modal hidden">
+      <div class="scan-modal-content">
+        <div class="scan-modal-header">
+          <h3>데이터메트릭스 스캔</h3>
+          <button id="scan-close" type="button" class="scan-close-btn">✕</button>
+        </div>
+        <div id="scan-reader" class="scan-reader"></div>
+        <p class="scan-hint">카메라를 데이터메트릭스 코드에 맞춰주세요</p>
+      </div>
+    </div>
+
+    <!-- html5-qrcode 라이브러리 (데이터메트릭스/바코드 스캔용) -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <!-- 앱 스크립트 -->
     <script src="script.js"></script>
   </body>

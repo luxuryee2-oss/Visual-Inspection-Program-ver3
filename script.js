@@ -24,6 +24,9 @@ const elBtnScan = document.getElementById('btn-scan');
 
 const elToastContainer = document.getElementById('toast-container');
 const elLoadingOverlay = document.getElementById('loading-overlay');
+const elScanModal = document.getElementById('scan-modal');
+const elScanReader = document.getElementById('scan-reader');
+const elScanClose = document.getElementById('scan-close');
 
 // 이미지 파일을 메모리에 보관
 const imageFiles = {
@@ -150,6 +153,84 @@ function bindImageInputs() {
 }
 
 // ============================
+// 카메라 스캔 기능
+// ============================
+
+let html5QrcodeScanner = null;
+
+function startScanning() {
+  if (!elScanModal || !elScanReader) return;
+
+  // 모달 표시
+  elScanModal.classList.remove('hidden');
+
+  // html5-qrcode 초기화
+  if (typeof Html5Qrcode === 'undefined') {
+    showToast('스캔 라이브러리를 불러올 수 없습니다.', 'error');
+    return;
+  }
+
+  html5QrcodeScanner = new Html5Qrcode('scan-reader');
+
+  const config = {
+    fps: 10,
+    qrbox: { width: 250, height: 250 },
+    aspectRatio: 1.0,
+    supportedScanTypes: [
+      Html5QrcodeScanType.SCAN_TYPE_CAMERA,
+    ],
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.DATA_MATRIX,
+      Html5QrcodeSupportedFormats.QR_CODE,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+    ],
+  };
+
+  html5QrcodeScanner
+    .start(
+      { facingMode: 'environment' }, // 후면 카메라 우선
+      config,
+      (decodedText) => {
+        // 스캔 성공
+        stopScanning();
+        elDatamatrix.value = decodedText;
+        if (!elProductName.value) {
+          elProductName.value = decodedText;
+        }
+        showToast('데이터메트릭스를 스캔했습니다.', 'success');
+      },
+      (errorMessage) => {
+        // 스캔 중 에러 (무시 - 계속 스캔)
+      }
+    )
+    .catch((err) => {
+      console.error('카메라 시작 실패:', err);
+      showToast('카메라를 시작할 수 없습니다. 권한을 확인해주세요.', 'error');
+      stopScanning();
+    });
+}
+
+function stopScanning() {
+  if (html5QrcodeScanner) {
+    html5QrcodeScanner
+      .stop()
+      .then(() => {
+        html5QrcodeScanner.clear();
+        html5QrcodeScanner = null;
+      })
+      .catch((err) => {
+        console.error('스캔 중지 실패:', err);
+      });
+  }
+  if (elScanModal) {
+    elScanModal.classList.add('hidden');
+  }
+}
+
+// ============================
 // 입력값 처리 및 검증
 // ============================
 
@@ -163,14 +244,25 @@ function bindDatamatrixBehavior() {
     }
   });
 
-  // 스캔 버튼: 단순히 데이터메트릭스 값을 제품명으로 복사
+  // 스캔 버튼: 카메라를 켜서 데이터메트릭스 스캔
   if (elBtnScan) {
     elBtnScan.addEventListener('click', () => {
-      if (elDatamatrix.value) {
-        elProductName.value = elDatamatrix.value;
-        showToast('데이터메트릭스를 제품명에 적용했습니다.', 'success');
-      } else {
-        showToast('먼저 데이터메트릭스 값을 입력하세요.', 'error');
+      startScanning();
+    });
+  }
+
+  // 스캔 모달 닫기 버튼
+  if (elScanClose) {
+    elScanClose.addEventListener('click', () => {
+      stopScanning();
+    });
+  }
+
+  // 모달 배경 클릭 시 닫기
+  if (elScanModal) {
+    elScanModal.addEventListener('click', (e) => {
+      if (e.target === elScanModal) {
+        stopScanning();
       }
     });
   }
